@@ -15,7 +15,7 @@ import Foundation
 
 var displayCount = 15 // Min: 10, Max: 25
 var maxSubtitleLineLength = 70
-var trendingPeriod = "daily" // Possible values: "daily", "weekly", "monthly"
+var trendingPeriod = "weekly" // Possible values: "daily", "weekly", "monthly"
 
 // Try not to edit the code below.
 
@@ -201,5 +201,17 @@ func printOutput(responseHTML html: String) {
 let url = URL(string: "https://github.com/trending/swift?since=\(trendingPeriod)")!
 let html = try? String(contentsOf: url)
 
-printOutput(responseHTML: html!)
+
+func delayWithSeconds(_ seconds: Double, completion: @escaping () -> ()) {
+    DispatchQueue.main.asyncAfter(deadline: .now() + seconds) {
+        completion()
+    }
+}
+
+
+if let html = html {
+    printOutput(responseHTML: html)
+} else {
+    print("No Connection")
+}
 
