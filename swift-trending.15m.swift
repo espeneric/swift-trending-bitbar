@@ -9,7 +9,6 @@
 // # <bitbar.dependencies>swift</bitbar.dependencies>
 // # <bitbar.abouturl>https://github.com/kaishin/swift-trending-bitbar</bitbar.abouturl>
 
-#if swift(>=4.0)
 import Foundation
 
 // PREFERENCES (Feel free to change these to your liking)
@@ -95,10 +94,6 @@ extension Array {
       return Array(self[startIndex..<startIndex.advanced(by: endIndex)])
     })
   }
-
-  subscript(safe index: Int) -> Element? {
-    return indices ~= index ? self[index] : nil
-  }
 }
 
 // Mark: - Repository
@@ -170,11 +165,10 @@ enum Period: String {
 // Mark: - Free Functions
 
 func trendingRepositories(html: String) -> [Repository] {
-  guard let repos = html.matches(pattern: "<ol class=\"repo-list\">(.|\n)*?</ol>")[safe: 0] else { return [] }
-
+  let repos = html.matches(pattern: "<ol class=\"repo-list\">(.|\n)*?</ol>")[0]
   let repoList = repos.matches(pattern: "<li class=(.|\n)*?</li>")
 
-  return repoList.flatMap { repo in
+  return repoList.compactMap { repo in
     let sanitizedString = repo.replacingOccurrences(of: "<[^>]+>", with: "", options: .regularExpression)
       .replacingOccurrences(of: "\n    Star|Built by\n|\n          Swift", with: "|", options: .regularExpression)
       .condenseWhitespace()
@@ -205,13 +199,7 @@ func printOutput(responseHTML html: String) {
 // Mark: - Output
 
 let url = URL(string: "https://github.com/trending/swift?since=\(trendingPeriod)")!
-if let html = try? String(contentsOf: url) {
-  printOutput(responseHTML: html)
-} else {
-  printOutput(responseHTML: "")
-}
-#else
-print("⚠️")
-print("---")
-print("Error: Swift 4 is required.")
-#endif
+let html = try? String(contentsOf: url)
+
+printOutput(responseHTML: html!)
+
